@@ -16,7 +16,7 @@
       const FONT_HEIGHT = 16;
       const BAR_LABEL_PADDING = 10;
       const FONT_STYLE = 'bold 16px Arial';
-      const FRAMES_PER_SECOND = 40;
+      const FRAMES_PER_SECOND = 50;
 
       function drawGraph({ elements }) {
         const canvas = document.getElementById('canvas');
@@ -67,21 +67,25 @@
 
         totalValue = getTotalValue(values);
 
-        values.forEach((element, id) => {
+        values.forEach((value, id) => {
           ctx.beginPath();
           const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
-          const barWidth = getBarWidth(element, totalValue, BAR_WIDTH);
+          const barWidth = getBarWidth(value, totalValue, BAR_WIDTH);
           ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
           ctx.fill();
 
           ctx.textBaseline = 'top';
           ctx.font = FONT_STYLE;
           ctx.fillText(
-            element,
+            formatLabelValue(value),
             barWidth + BAR_LABEL_PADDING,
             yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
           );
         });
+      }
+
+      function formatLabelValue(num) {
+        return num.toString().match(/^-?\d+(?:\.\d{0,2})?/)[0];
       }
 
       function getBarWidth(value, totalValue, maxBarWidth) {
