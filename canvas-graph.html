@@ -16,29 +16,55 @@
       const FONT_HEIGHT = 16;
       const BAR_LABEL_PADDING = 10;
       const FONT_STYLE = 'bold 16px Arial';
-      const FRAME_INTERVAL = 1000;
+      const FRAMES_PER_SECOND = 40;
 
       function drawGraph({ elements }) {
         const canvas = document.getElementById('canvas');
         canvas.height = calculateTotalCanvasHeight(elements.length);
 
-        const sets = elements[0].length;
-        for (let i = 0; i < sets; i++) {
-          const delay = i * FRAME_INTERVAL;
-          const values = getValuesForSet(elements, i);
-          setTimeout(() => {
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            drawCanvas(values, ctx);
-          }, delay);
+        const numSets = elements[0].length;
+        for (let setIndex = 0; setIndex < numSets; setIndex++) {
+          for (
+            let frameIndex = 0;
+            frameIndex < FRAMES_PER_SECOND;
+            frameIndex++
+          ) {
+            // Only compute first frame of last set
+            if (!isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex)) {
+              const delay = (setIndex + frameIndex / FRAMES_PER_SECOND) * 1000;
+              const values = getValuesForSet(elements, setIndex, frameIndex);
+              setTimeout(() => {
+                drawCanvas(values, canvas);
+              }, delay);
+            }
+          }
         }
       }
 
-      function getValuesForSet(elements, setIndex) {
-        return elements.map((element) => element[setIndex]);
+      function isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex) {
+        return setIndex === numSets - 1 && frameIndex !== 0;
       }
 
-      function drawCanvas(values, ctx) {
+      function getValuesForSet(categories, setIndex, frameIndex) {
+        return categories.map((category) => {
+          const value = category[setIndex];
+
+          let diff = 0;
+          // Accessing next value if there are no other frames after the value
+          // would cause array out of bounds on category.
+          if (frameIndex > 0) {
+            const nextValue = category[setIndex + 1];
+            diff = nextValue - value;
+          }
+
+          return value + (frameIndex / FRAMES_PER_SECOND) * diff;
+        });
+      }
+
+      function drawCanvas(values, canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         totalValue = getTotalValue(values);
 
         values.forEach((element, id) => {
@@ -75,7 +101,7 @@
         return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
       }
 
-      drawGraph({ elements: [[40, 52, 38, 100], [12, 28, 92, 0]] });
+      drawGraph({ elements: [[40, 52, 38, 98], [12, 28, 92, 4]] });
     </script>
   </body>
 </html>
