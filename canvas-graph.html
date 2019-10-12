@@ -7,31 +7,40 @@
     <title>Document</title>
   </head>
   <body>
-    <canvas id="canvas" width="1000"></canvas>
+    <canvas id="canvas" width="1100"></canvas>
 
     <script>
       const BAR_WIDTH = 1000;
       const BAR_MARGIN = 10;
       const BAR_HEIGHT = 40;
+      const FONT_HEIGHT = 16;
+      const BAR_LABEL_PADDING = 10;
+      const FONT_STYLE = 'bold 16px Arial';
 
       function drawGraph({ elements }) {
         var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
-
         canvas.height = calculateTotalCanvasHeight(elements.length);
-        drawCanvas(elements, ctx);
+        drawCanvas(elements, canvas);
       }
 
-      function drawCanvas(elements, ctx) {
+      function drawCanvas(elements, canvas) {
+        var ctx = canvas.getContext('2d');
         maxValue = getMaxElementValue(elements);
 
         elements.forEach((element, id) => {
           ctx.beginPath();
           const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
           const barWidth = getBarWidth(element, maxValue, BAR_WIDTH);
-          console.log(element, maxValue, BAR_WIDTH);
           ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
           ctx.fill();
+
+          ctx.textBaseline = 'top';
+          ctx.font = FONT_STYLE;
+          ctx.fillText(
+            element,
+            barWidth + BAR_LABEL_PADDING,
+            yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
+          );
         });
       }
 
