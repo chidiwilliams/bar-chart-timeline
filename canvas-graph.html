@@ -18,11 +18,11 @@
       const FONT_STYLE = 'bold 16px Arial';
       const FRAMES_PER_SECOND = 50;
 
-      function drawGraph({ elements }) {
+      function drawGraph({ categories }) {
         const canvas = document.getElementById('canvas');
-        canvas.height = calculateTotalCanvasHeight(elements.length);
+        canvas.height = calculateTotalCanvasHeight(categories.length);
 
-        const numSets = elements[0].length;
+        const numSets = categories[0].values.length;
         for (let setIndex = 0; setIndex < numSets; setIndex++) {
           for (
             let frameIndex = 0;
@@ -32,13 +32,18 @@
             // Only compute first frame of last set
             if (!isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex)) {
               const delay = (setIndex + frameIndex / FRAMES_PER_SECOND) * 1000;
-              const values = getValuesForSet(elements, setIndex, frameIndex);
+              const values = getValuesForSet(categories, setIndex, frameIndex);
+              const categoryNames = getCategoryNames(categories);
               setTimeout(() => {
-                drawCanvas(values, canvas);
+                drawCanvas(values, canvas, categoryNames);
               }, delay);
             }
           }
         }
+      }
+
+      function getCategoryNames(categories) {
+        return categories.map(({ name }) => name);
       }
 
       function isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex) {
@@ -47,13 +52,13 @@
 
       function getValuesForSet(categories, setIndex, frameIndex) {
         return categories.map((category) => {
-          const value = category[setIndex];
+          const value = category.values[setIndex];
 
           let diff = 0;
           // Accessing next value if there are no other frames after the value
           // would cause array out of bounds on category.
           if (frameIndex > 0) {
-            const nextValue = category[setIndex + 1];
+            const nextValue = category.values[setIndex + 1];
             diff = nextValue - value;
           }
 
@@ -61,7 +66,7 @@
         });
       }
 
-      function drawCanvas(values, canvas) {
+      function drawCanvas(values, canvas, categoryNames) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -76,8 +81,9 @@
 
           ctx.textBaseline = 'top';
           ctx.font = FONT_STYLE;
+          const label = `${formatLabelValue(value)} - ${categoryNames[id]}`;
           ctx.fillText(
-            formatLabelValue(value),
+            label,
             barWidth + BAR_LABEL_PADDING,
             yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
           );
@@ -110,7 +116,14 @@
         return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
       }
 
-      drawGraph({ elements: [[40, 52, 38, 98], [12, 28, 92, 4]] });
+      drawGraph({
+        categories: [
+          { name: 'A', values: [...Array(30)].map(() => Math.random()) },
+          { name: 'B', values: [...Array(30)].map(() => Math.random()) },
+          { name: 'C', values: [...Array(30)].map(() => Math.random()) },
+          { name: 'D', values: [...Array(30)].map(() => Math.random()) },
+        ],
+      });
     </script>
   </body>
 </html>
