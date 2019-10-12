@@ -4,13 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <title>Animated Bar Chart</title>
   </head>
   <body>
-    <canvas id="canvas" width="1100" style="border: solid 1px #000;"></canvas>
+    <h3>Animated Bar Chart</h3>
+    <form action="" style="margin-bottom: 20px; ">
+      <input
+        type="number"
+        name="num_categories"
+        style="height: 40px; box-sizing: border-box; font-size: 1rem;"
+      />
+      <button type="submit" style="height: 40px; font-size: 1rem;">
+        Randomize
+      </button>
+    </form>
+
+    <canvas id="canvas" width="1000" style="border: solid 1px #000;"></canvas>
 
     <script>
-      const BAR_WIDTH = 1000;
+      const BAR_WIDTH = 700;
       const BAR_MARGIN = 10;
       const BAR_HEIGHT = 40;
       const FONT_HEIGHT = 16;
@@ -116,14 +128,18 @@
         return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
       }
 
-      drawGraph({
-        categories: [
-          { name: 'A', values: [...Array(30)].map(() => Math.random()) },
-          { name: 'B', values: [...Array(30)].map(() => Math.random()) },
-          { name: 'C', values: [...Array(30)].map(() => Math.random()) },
-          { name: 'D', values: [...Array(30)].map(() => Math.random()) },
-        ],
-      });
+      const url = new URL(document.location.href);
+      if (url.searchParams.has('num_categories')) {
+        const numCategories = Number(url.searchParams.get('num_categories'));
+        if (!isNaN(numCategories) && numCategories > 0) {
+          drawGraph({
+            categories: [...Array(numCategories)].map((_, i) => ({
+              name: `Category ${i + 1}`,
+              values: [...Array(30)].map(() => Math.random()),
+            })),
+          });
+        }
+      }
     </script>
   </body>
 </html>
