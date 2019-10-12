@@ -10,34 +10,44 @@
     <canvas id="canvas" width="1000"></canvas>
 
     <script>
-      const barWidth = 1000;
-      const barMargin = 10;
-      const barHeight = 40;
+      const BAR_WIDTH = 1000;
+      const BAR_MARGIN = 10;
+      const BAR_HEIGHT = 40;
 
       function drawGraph({ elements }) {
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
-
-        let totalCanvasHeight;
 
         canvas.height = calculateTotalCanvasHeight(elements.length);
         drawCanvas(elements, ctx);
       }
 
       function drawCanvas(elements, ctx) {
+        maxValue = getMaxElementValue(elements);
+
         elements.forEach((element, id) => {
           ctx.beginPath();
-          const yMargin = (barHeight + barMargin) * id;
-          ctx.rect(0, yMargin, barWidth, barHeight);
+          const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
+          const barWidth = getBarWidth(element, maxValue, BAR_WIDTH);
+          console.log(element, maxValue, BAR_WIDTH);
+          ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
           ctx.fill();
         });
       }
 
-      function calculateTotalCanvasHeight(numElements) {
-        return numElements * barHeight + (numElements - 1) * barMargin;
+      function getBarWidth(value, maxValue, maxBarWidth) {
+        return (value / maxValue) * maxBarWidth;
       }
 
-      drawGraph({ elements: [1, 2, 3] });
+      function getMaxElementValue(elements) {
+        return Math.max(...elements);
+      }
+
+      function calculateTotalCanvasHeight(numElements) {
+        return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
+      }
+
+      drawGraph({ elements: [40, 82, 12, 28, 19] });
     </script>
   </body>
 </html>
