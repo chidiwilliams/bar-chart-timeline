@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="1000"></canvas>
+
+    <script>
+      const barWidth = 1000;
+      const barMargin = 10;
+      const barHeight = 40;
+
+      function drawGraph({ elements }) {
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        let totalCanvasHeight;
+
+        canvas.height = calculateTotalCanvasHeight(elements.length);
+        drawCanvas(elements, ctx);
+      }
+
+      function drawCanvas(elements, ctx) {
+        elements.forEach((element, id) => {
+          ctx.beginPath();
+          const yMargin = (barHeight + barMargin) * id;
+          ctx.rect(0, yMargin, barWidth, barHeight);
+          ctx.fill();
+        });
+      }
+
+      function calculateTotalCanvasHeight(numElements) {
+        return numElements * barHeight + (numElements - 1) * barMargin;
+      }
+
+      drawGraph({ elements: [1, 2, 3] });
+    </script>
+  </body>
+</html>
