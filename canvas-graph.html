@@ -7,7 +7,7 @@
     <title>Document</title>
   </head>
   <body>
-    <canvas id="canvas" width="1100"></canvas>
+    <canvas id="canvas" width="1100" style="border: solid 1px #000;"></canvas>
 
     <script>
       const BAR_WIDTH = 1000;
@@ -39,7 +39,7 @@
       }
 
       function drawCanvas(values, ctx) {
-        totalValue = getMaxElementValue(values);
+        totalValue = getTotalValue(values);
 
         values.forEach((element, id) => {
           ctx.beginPath();
@@ -62,15 +62,20 @@
         return (value / totalValue) * maxBarWidth;
       }
 
-      function getMaxElementValue(elements) {
-        return Math.max(...elements);
+      function getTotalValue(vals) {
+        let s = 0;
+        for (let i = 0; i < vals.length; i++) {
+          const v = vals[i];
+          s += v;
+        }
+        return s;
       }
 
       function calculateTotalCanvasHeight(numElements) {
         return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
       }
 
-      drawGraph({ elements: [[40, 52, 38], [12, 28, 92]] });
+      drawGraph({ elements: [[40, 52, 38, 100], [12, 28, 92, 0]] });
     </script>
   </body>
 </html>
