@@ -16,21 +16,35 @@
       const FONT_HEIGHT = 16;
       const BAR_LABEL_PADDING = 10;
       const FONT_STYLE = 'bold 16px Arial';
+      const FRAME_INTERVAL = 1000;
 
       function drawGraph({ elements }) {
-        var canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('canvas');
         canvas.height = calculateTotalCanvasHeight(elements.length);
-        drawCanvas(elements, canvas);
+
+        const sets = elements[0].length;
+        for (let i = 0; i < sets; i++) {
+          const delay = i * FRAME_INTERVAL;
+          const values = getValuesForSet(elements, i);
+          setTimeout(() => {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            drawCanvas(values, ctx);
+          }, delay);
+        }
       }
 
-      function drawCanvas(elements, canvas) {
-        var ctx = canvas.getContext('2d');
-        maxValue = getMaxElementValue(elements);
+      function getValuesForSet(elements, setIndex) {
+        return elements.map((element) => element[setIndex]);
+      }
 
-        elements.forEach((element, id) => {
+      function drawCanvas(values, ctx) {
+        totalValue = getMaxElementValue(values);
+
+        values.forEach((element, id) => {
           ctx.beginPath();
           const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
-          const barWidth = getBarWidth(element, maxValue, BAR_WIDTH);
+          const barWidth = getBarWidth(element, totalValue, BAR_WIDTH);
           ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
           ctx.fill();
 
@@ -44,8 +58,8 @@
         });
       }
 
-      function getBarWidth(value, maxValue, maxBarWidth) {
-        return (value / maxValue) * maxBarWidth;
+      function getBarWidth(value, totalValue, maxBarWidth) {
+        return (value / totalValue) * maxBarWidth;
       }
 
       function getMaxElementValue(elements) {
@@ -56,7 +70,7 @@
         return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
       }
 
-      drawGraph({ elements: [40, 82, 12, 28, 19] });
+      drawGraph({ elements: [[40, 52, 38], [12, 28, 92]] });
     </script>
   </body>
 </html>
