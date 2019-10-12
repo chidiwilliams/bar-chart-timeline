@@ -85,7 +85,12 @@
       }
 
       function formatLabelValue(num) {
-        return num.toString().match(/^-?\d+(?:\.\d{0,2})?/)[0];
+        return (
+          num
+            .toString()
+            // truncate to 2 decimal places
+            .match(/^-?\d+(?:\.\d{0,2})?/)[0]
+        );
       }
 
       function getBarWidth(value, totalValue, maxBarWidth) {
