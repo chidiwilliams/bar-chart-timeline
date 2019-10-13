@@ -6,7 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Animated Bar Chart</title>
   </head>
-  <body>
+  <body
+    style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;"
+  >
     <h3>Animated Bar Chart</h3>
     <form action="" style="margin-bottom: 20px; ">
       <input
@@ -35,6 +37,8 @@
         const canvas = document.getElementById('canvas');
         canvas.height = calculateTotalCanvasHeight(categories.length);
 
+        categories = withRandomColors(categories);
+
         const numSets = categories[0].values.length;
         for (let setIndex = 0; setIndex < numSets; setIndex++) {
           for (
@@ -52,6 +56,22 @@
             }
           }
         }
+      }
+
+      function withRandomColors(categories) {
+        return categories.map((category) => ({
+          ...category,
+          color: getRandomColor(),
+        }));
+      }
+
+      function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
       }
 
       function getCategoryNames(categories) {
@@ -77,6 +97,7 @@
           return {
             value: value + (frameIndex / FRAMES_PER_SECOND) * diff,
             name: category.name,
+            color: category.color,
           };
         });
       }
@@ -89,7 +110,9 @@
 
         values
           .sort((a, b) => b.value - a.value)
-          .forEach(({ value, name }, id) => {
+          .forEach(({ value, name, color }, id) => {
+            ctx.fillStyle = color;
+
             ctx.beginPath();
             const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
             const barWidth = getBarWidth(value, totalValue, BAR_WIDTH);
