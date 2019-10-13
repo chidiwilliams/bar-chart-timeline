@@ -35,7 +35,6 @@
 
       function drawGraph({ categories }) {
         const canvas = document.getElementById('canvas');
-        canvas.height = calculateTotalCanvasHeight(categories.length);
 
         categories = withRandomColors(categories);
 
@@ -83,42 +82,45 @@
       }
 
       function getValuesForSet(categories, setIndex, frameIndex) {
-        return categories.map((category) => {
-          const value = category.values[setIndex];
+        return categories
+          .map((category) => {
+            const value = category.values[setIndex];
 
-          let diff = 0;
-          // Accessing next value if there are no other frames after the value
-          // would cause array out of bounds on category.
-          if (frameIndex > 0) {
-            const nextValue = category.values[setIndex + 1];
-            diff = nextValue - value;
-          }
+            let diff = 0;
+            // Accessing next value if there are no other frames after the value
+            // would cause array out of bounds on category.
+            if (frameIndex > 0) {
+              const nextValue = category.values[setIndex + 1];
+              diff = nextValue - value;
+            }
 
-          return {
-            value: value + (frameIndex / FRAMES_PER_SECOND) * diff,
-            name: category.name,
-            color: category.color,
-          };
-        });
+            return {
+              value: value + (frameIndex / FRAMES_PER_SECOND) * diff,
+              name: category.name,
+              color: category.color,
+            };
+          })
+          .sort((a, b) => b.value - a.value)
+          .filter(({ value }) => value > 0);
       }
 
       function drawCanvas(values, canvas) {
         const ctx = canvas.getContext('2d');
+
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        canvas.height = calculateTotalCanvasHeight(values.length);
 
         totalValue = getTotalValue(values);
 
-        values
-          .sort((a, b) => b.value - a.value)
-          .forEach(({ value, name, color }, id) => {
-            const barYMargin = getBarYMargin(id);
-            const valuePercentage = (value * 100) / totalValue;
-            const barWidth = (valuePercentage / 100) * BAR_MAX_WIDTH;
-            const barLabel = getBarLabel(valuePercentage, name);
+        values.forEach(({ value, name, color }, id) => {
+          const barYMargin = getBarYMargin(id);
+          const valuePercentage = (value * 100) / totalValue;
+          const barWidth = (valuePercentage / 100) * BAR_MAX_WIDTH;
+          const barLabel = getBarLabel(valuePercentage, name);
 
-            drawBar(ctx, color, barYMargin, barWidth);
-            drawBarLabel(ctx, barLabel, barWidth, barYMargin);
-          });
+          drawBar(ctx, color, barYMargin, barWidth);
+          drawBarLabel(ctx, barLabel, barWidth, barYMargin);
+        });
       }
 
       function getTotalValue(vals) {
