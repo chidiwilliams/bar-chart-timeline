@@ -13,6 +13,7 @@
         type="number"
         name="num_categories"
         style="height: 40px; box-sizing: border-box; font-size: 1rem;"
+        value="3"
       />
       <button type="submit" style="height: 40px; font-size: 1rem;">
         Randomize
@@ -45,9 +46,8 @@
             if (!isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex)) {
               const delay = (setIndex + frameIndex / FRAMES_PER_SECOND) * 1000;
               const values = getValuesForSet(categories, setIndex, frameIndex);
-              const categoryNames = getCategoryNames(categories);
               setTimeout(() => {
-                drawCanvas(values, canvas, categoryNames);
+                drawCanvas(values, canvas);
               }, delay);
             }
           }
@@ -74,32 +74,37 @@
             diff = nextValue - value;
           }
 
-          return value + (frameIndex / FRAMES_PER_SECOND) * diff;
+          return {
+            value: value + (frameIndex / FRAMES_PER_SECOND) * diff,
+            name: category.name,
+          };
         });
       }
 
-      function drawCanvas(values, canvas, categoryNames) {
+      function drawCanvas(values, canvas) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         totalValue = getTotalValue(values);
 
-        values.forEach((value, id) => {
-          ctx.beginPath();
-          const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
-          const barWidth = getBarWidth(value, totalValue, BAR_WIDTH);
-          ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
-          ctx.fill();
+        values
+          .sort((a, b) => b.value - a.value)
+          .forEach(({ value, name }, id) => {
+            ctx.beginPath();
+            const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
+            const barWidth = getBarWidth(value, totalValue, BAR_WIDTH);
+            ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
+            ctx.fill();
 
-          ctx.textBaseline = 'top';
-          ctx.font = FONT_STYLE;
-          const label = `${formatLabelValue(value)} - ${categoryNames[id]}`;
-          ctx.fillText(
-            label,
-            barWidth + BAR_LABEL_PADDING,
-            yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
-          );
-        });
+            ctx.textBaseline = 'top';
+            ctx.font = FONT_STYLE;
+            const label = `${formatLabelValue(value)} - ${name}`;
+            ctx.fillText(
+              label,
+              barWidth + BAR_LABEL_PADDING,
+              yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
+            );
+          });
       }
 
       function formatLabelValue(num) {
@@ -118,7 +123,7 @@
       function getTotalValue(vals) {
         let s = 0;
         for (let i = 0; i < vals.length; i++) {
-          const v = vals[i];
+          const v = vals[i].value;
           s += v;
         }
         return s;
