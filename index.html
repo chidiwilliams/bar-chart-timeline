@@ -25,7 +25,7 @@
     <canvas id="canvas" width="1000" style="border: solid 1px #000;"></canvas>
 
     <script>
-      const BAR_WIDTH = 700;
+      const BAR_MAX_WIDTH = 700;
       const BAR_MARGIN = 10;
       const BAR_HEIGHT = 40;
       const FONT_HEIGHT = 16;
@@ -58,6 +58,10 @@
         }
       }
 
+      function calculateTotalCanvasHeight(numElements) {
+        return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
+      }
+
       function withRandomColors(categories) {
         return categories.map((category) => ({
           ...category,
@@ -72,10 +76,6 @@
           color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
-      }
-
-      function getCategoryNames(categories) {
-        return categories.map(({ name }) => name);
       }
 
       function isAdditionalFrameAtLastSet(setIndex, numSets, frameIndex) {
@@ -111,36 +111,14 @@
         values
           .sort((a, b) => b.value - a.value)
           .forEach(({ value, name, color }, id) => {
-            ctx.fillStyle = color;
+            const barYMargin = getBarYMargin(id);
+            const valuePercentage = (value * 100) / totalValue;
+            const barWidth = (valuePercentage / 100) * BAR_MAX_WIDTH;
+            const barLabel = getBarLabel(valuePercentage, name);
 
-            ctx.beginPath();
-            const yMargin = (BAR_HEIGHT + BAR_MARGIN) * id;
-            const barWidth = getBarWidth(value, totalValue, BAR_WIDTH);
-            ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
-            ctx.fill();
-
-            ctx.textBaseline = 'top';
-            ctx.font = FONT_STYLE;
-            const label = `${formatLabelValue(value)} - ${name}`;
-            ctx.fillText(
-              label,
-              barWidth + BAR_LABEL_PADDING,
-              yMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2,
-            );
+            drawBar(ctx, color, barYMargin, barWidth);
+            drawBarLabel(ctx, barLabel, barWidth, barYMargin);
           });
-      }
-
-      function formatLabelValue(num) {
-        return (
-          num
-            .toString()
-            // truncate to 2 decimal places
-            .match(/^-?\d+(?:\.\d{0,2})?/)[0]
-        );
-      }
-
-      function getBarWidth(value, totalValue, maxBarWidth) {
-        return (value / totalValue) * maxBarWidth;
       }
 
       function getTotalValue(vals) {
@@ -152,8 +130,37 @@
         return s;
       }
 
-      function calculateTotalCanvasHeight(numElements) {
-        return numElements * BAR_HEIGHT + (numElements - 1) * BAR_MARGIN;
+      function getBarYMargin(barID) {
+        return (BAR_HEIGHT + BAR_MARGIN) * barID;
+      }
+
+      function getBarLabel(valuePercentage, categoryName) {
+        return `${formatTo2DecimalPlaces(valuePercentage)}% - ${categoryName}`;
+      }
+
+      function formatTo2DecimalPlaces(num) {
+        return (
+          num
+            .toString()
+            // truncate to 2 decimal places
+            .match(/^-?\d+(?:\.\d{0,2})?/)[0]
+        );
+      }
+
+      function drawBar(ctx, color, yMargin, barWidth) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.rect(0, yMargin, barWidth, BAR_HEIGHT);
+        ctx.fill();
+      }
+
+      function drawBarLabel(ctx, label, barWidth, barYMargin) {
+        const xMargin = barWidth + BAR_LABEL_PADDING;
+        const yMargin = barYMargin + BAR_HEIGHT / 2 - FONT_HEIGHT / 2;
+
+        ctx.textBaseline = 'top';
+        ctx.font = FONT_STYLE;
+        ctx.fillText(label, xMargin, yMargin);
       }
 
       const url = new URL(document.location.href);
